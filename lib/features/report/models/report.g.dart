@@ -16,10 +16,7 @@ Report _$ReportFromJson(Map<String, dynamic> json) => Report(
           ? null
           : UserEntity.fromJson(json['reporterUser'] as Map<String, dynamic>),
       reporterUserId: json['reporterUserId'] as int?,
-      photo: json['photo'] == null
-          ? null
-          : Photo.fromJson(json['photo'] as Map<String, dynamic>),
-      photoId: json['photoId'] as int?,
+      photo: json['photo'] as String?,
       garbage: json['garbage'] == null
           ? null
           : Garbage.fromJson(json['garbage'] as Map<String, dynamic>),
@@ -34,7 +31,6 @@ Map<String, dynamic> _$ReportToJson(Report instance) => <String, dynamic>{
       'reporterUser': instance.reporterUser,
       'reporterUserId': instance.reporterUserId,
       'photo': instance.photo,
-      'photoId': instance.photoId,
       'garbage': instance.garbage,
       'garbageId': instance.garbageId,
     };

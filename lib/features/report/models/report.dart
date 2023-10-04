@@ -13,8 +13,7 @@ class Report {
   ReportType? reportType;
   UserEntity? reporterUser; // Use double for latitude and longitude
   int? reporterUserId;
-  Photo? photo;
-  int? photoId;
+  String? photo;
   Garbage? garbage;
   int? garbageId;
 
@@ -26,7 +25,6 @@ class Report {
       this.reporterUser,
       this.reporterUserId,
       this.photo,
-      this.photoId,
       this.garbage,
       this.garbageId});
 

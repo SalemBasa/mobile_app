@@ -7,6 +7,8 @@ import 'package:trash_track_mobile/features/garbage/services/garbages_service.da
 import 'package:trash_track_mobile/features/report/screens/add_report.dart';
 import 'package:trash_track_mobile/features/report/screens/garbage_map.dart';
 import 'package:trash_track_mobile/features/report/services/reports_service.dart';
+import 'package:trash_track_mobile/features/reservation/services/reservation_service.dart';
+import 'package:trash_track_mobile/features/services/services/services_service.dart';
 import 'package:trash_track_mobile/features/user/screens/login_screen.dart';
 import 'package:trash_track_mobile/features/user/screens/sign-up_screen.dart';
 import 'package:trash_track_mobile/features/user/services/auth_service.dart';
@@ -20,6 +22,9 @@ void main() {
         ChangeNotifierProvider(create: (context) => AuthService()),
         ChangeNotifierProvider(create: (context) => GarbageService()),
         ChangeNotifierProvider(create: (context) => ReportService()),
+        ChangeNotifierProvider(create: (context) => ServicesService()),
+        ChangeNotifierProvider(create: (context) => ReservationService()),
+
       ],
       child: const MyApp()
     ),

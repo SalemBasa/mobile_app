@@ -263,23 +263,15 @@ class _AddReportScreenState extends State<AddReportScreen> {
                   final _selectedReportState =
                       ReportState.values[_selectedReportStatesIndex];
 
-                  final newReport = {
-                    'note': newName,
-                    'reportState': _selectedReportState,
-                    'reportType': _selectedReportType,
-                    'reporterUserId': userId,
-                    'garbageId': selectedGarbageId,
-                  };
+                  final newReport = Report(
+                    note: newName,
+                    reportState: _selectedReportState,
+                    reportType: _selectedReportType,
+                    reporterUserId: userId,
+                    garbageId: selectedGarbageId,
+                    photo: _selectedImageBase64
+                  );
 
-                  if (_selectedImageBase64 != null) {
-                    // Create a newPhoto object
-                    final newPhoto = {
-                      'data': _selectedImageBase64,
-                    };
-
-                    // Add newPhoto to a list of photos in newReport
-                    newReport['photo'] = [newPhoto];
-                  }
                   try {
                     await reportService.insert(newReport);
                     // Optionally, you can navigate to another screen or show a success message here.

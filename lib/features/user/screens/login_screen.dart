@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trash_track_mobile/features/garbage/screens/add-garbage.dart';
 import 'package:trash_track_mobile/features/report/screens/add_report.dart';
+import 'package:trash_track_mobile/features/reservation/screens/add-reservation.dart';
 import 'package:trash_track_mobile/features/user/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -30,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // Login successful, navigate to the AddReportScreen and pass the selectedGarbageId if needed.
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => AddReportScreen(), // Pass the selectedGarbageId here
+        builder: (context) => ReservationAddScreen(), // Pass the selectedGarbageId here
       ),
     );
   } else {
