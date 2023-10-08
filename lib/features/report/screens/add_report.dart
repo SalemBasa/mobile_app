@@ -25,8 +25,6 @@ class _AddReportScreenState extends State<AddReportScreen> {
   late EnumsService _enumsService;
   late int _selectedReportTypeIndex;
   late Map<int, String> _reportTypes;
-  late int _selectedReportStatesIndex;
-  late Map<int, String> _reportStates;
   bool _isLoading = true;
   final reportService = ReportService();
   int? userId;
@@ -40,8 +38,6 @@ class _AddReportScreenState extends State<AddReportScreen> {
     _noteController = TextEditingController();
     _selectedReportTypeIndex = 0;
     _fetchReportTypes();
-    _selectedReportStatesIndex = 0;
-    _fetchReportSates();
     _fetchUserIdFromToken();
   }
 
@@ -83,23 +79,6 @@ class _AddReportScreenState extends State<AddReportScreen> {
       }
     } catch (error) {
       print('Error fetching report types: $error');
-    }
-  }
-
-  Future<void> _fetchReportSates() async {
-    try {
-      final typesData = await _enumsService.getReportStates();
-
-      if (typesData is Map<int, String>) {
-        setState(() {
-          _reportStates = typesData;
-          _isLoading = false;
-        });
-      } else {
-        print('Received unexpected data format for report states: $typesData');
-      }
-    } catch (error) {
-      print('Error fetching report states: $error');
     }
   }
 
@@ -164,49 +143,6 @@ class _AddReportScreenState extends State<AddReportScreen> {
                     ),
                   ),
             const SizedBox(height: 16),
-            _isLoading
-                ? CircularProgressIndicator()
-                : SizedBox(
-                    width: 400,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Container(
-                        width: 400,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.white,
-                          border: Border.all(
-                            color: const Color(0xFF49464E),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: DropdownButtonFormField<int>(
-                            value: _selectedReportStatesIndex,
-                            onChanged: (newValue) {
-                              setState(() {
-                                _selectedReportStatesIndex = newValue ?? 0;
-                              });
-                            },
-                            items: _reportStates.entries.map((entry) {
-                              return DropdownMenuItem<int>(
-                                value: entry.key,
-                                child: Text(entry.value),
-                              );
-                            }).toList(),
-                            decoration: InputDecoration(
-                              labelText: 'Report State',
-                              border: InputBorder.none,
-                            ),
-                            style: TextStyle(
-                              color: const Color(0xFF49464E),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-            SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
                 final _selectedGarbageId = await Navigator.push<int>(
@@ -260,17 +196,13 @@ class _AddReportScreenState extends State<AddReportScreen> {
                   final _selectedReportType =
                       ReportType.values[_selectedReportTypeIndex];
 
-                  final _selectedReportState =
-                      ReportState.values[_selectedReportStatesIndex];
-
                   final newReport = Report(
-                    note: newName,
-                    reportState: _selectedReportState,
-                    reportType: _selectedReportType,
-                    reporterUserId: userId,
-                    garbageId: selectedGarbageId,
-                    photo: _selectedImageBase64
-                  );
+                      note: newName,
+                      reportState: ReportState.waitingForReview,
+                      reportType: _selectedReportType,
+                      reporterUserId: userId,
+                      garbageId: selectedGarbageId,
+                      photo: _selectedImageBase64);
 
                   try {
                     await reportService.insert(newReport);

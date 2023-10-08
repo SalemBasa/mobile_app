@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // Login successful, navigate to the AddReportScreen and pass the selectedGarbageId if needed.
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => ReservationAddScreen(), // Pass the selectedGarbageId here
+        builder: (context) => AddReportScreen(), // Pass the selectedGarbageId here
       ),
     );
   } else {

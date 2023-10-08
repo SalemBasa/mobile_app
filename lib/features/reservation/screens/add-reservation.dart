@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_paypal/flutter_paypal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trash_track_mobile/features/reservation/models/reservation.dart';
 import 'package:trash_track_mobile/features/reservation/services/reservation_service.dart';
@@ -8,6 +7,7 @@ import 'package:trash_track_mobile/features/services/models/service.dart';
 import 'package:trash_track_mobile/features/services/services/services_service.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import 'package:trash_track_mobile/shared/services/enums_service.dart';
+import 'package:flutter_paypal/flutter_paypal.dart';
 
 class ReservationAddScreen extends StatefulWidget {
   ReservationAddScreen({Key? key}) : super(key: key);
@@ -198,7 +198,7 @@ class _ReservationAddScreenState extends State<ReservationAddScreen> {
                           value: model.id,
                           child: Text((model.name ?? '') +
                               ' ' +
-                              (_selectedServicePrice.toString() ?? '')),
+                              (_selectedServicePrice.toString())),
                         );
                       }).toList(),
                       decoration: InputDecoration(
@@ -222,25 +222,68 @@ class _ReservationAddScreenState extends State<ReservationAddScreen> {
             SizedBox(
               width: 400,
               child: ElevatedButton(
-                onPressed: () async {
-                  final _selectedReportState =
-                      ReservationStatus.values[_selectedReservationStatusIndex];
+                onPressed: () => {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => UsePaypal(
+                          sandboxMode: true,
+                          clientId:
+                              'AVFknc5oxUGa8x5r0iSzn0Ca3he6GoxEdVs0Zp0JMgI-m_eEt2Fwvi55CtbSV86U2BJM2lecOgvaAb2Y',
+                          secretKey:
+                              'EFYEQd6AALi7DZUENJSVRoog3ZNrSpn0n3vyPQDRlE0TDJ3G1xReLSYAFtSZnr9_OqYOmk_A4ATEqSRL',
+                          returnURL: "https://samplesite.com/return",
+                          cancelURL: "https://samplesite.com/cancel",
+                          transactions: [
+                            {
+                              "amount": {
+                                "total": _selectedServicePrice,
+                                "currency": "USD",
+                                "details": {
+                                  "subtotal": _selectedServicePrice,
+                                  "shipping": '0',
+                                  "shipping_discount": 0
+                                }
+                              },
+                              "description":
+                                  "The payment transaction description.",
+                              "item_list": {
+                                "items": [
+                                  {
+                                    "name": "Service payment",
+                                    "quantity": 1,
+                                    "price": _selectedServicePrice,
+                                    "currency": "USD"
+                                  }
+                                ],
+                              }
+                            }
+                          ],
+                          note: "Contact us for any questions on your order.",
+                          onSuccess: (Map params) async {
+                            try {
+                              final _selectedReportState = ReservationStatus
+                                  .values[_selectedReservationStatusIndex];
 
-                  final newReservation = Reservation(
-                    serviceId: _selectedServiceId,
-                    userId: userId,
-                    latitude: _selectedLocation!.latitude,
-                    longitude: _selectedLocation!.longitude,
-                    reservationStatus: _selectedReportState,
-                    price:
-                        _selectedServicePrice, // Set the price from the selected service
-                  );
+                              final newReservation = Reservation(
+                                  serviceId: _selectedServiceId,
+                                  userId: userId,
+                                  latitude: _selectedLocation!.latitude,
+                                  longitude: _selectedLocation!.longitude,
+                                  reservationStatus: _selectedReportState,
+                                  price: _selectedServicePrice
+                                  );
 
-                  try {
-                    await _reservationService.insert(newReservation);
-                  } catch (error) {
-                    print('Error adding reservation: $error');
-                  }
+                              await _reservationService.insert(newReservation);
+                            } on Exception catch (error) {
+                              print('Error adding reservation: $error');
+                            }
+                          },
+                          onError: (error) {},
+                          onCancel: (params) {
+                             print('cancelled: $params');
+                          }),
+                    ),
+                  )
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -254,72 +297,6 @@ class _ReservationAddScreenState extends State<ReservationAddScreen> {
                   minimumSize: Size(400, 48),
                 ),
               ),
-            ),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.paypal),
-              style: ElevatedButton.styleFrom(
-                  primary: const Color.fromRGBO(0, 48, 135, 1)),
-              onPressed: () => {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => UsePaypal(
-                        sandboxMode: true,
-                        clientId:
-                            'AVFknc5oxUGa8x5r0iSzn0Ca3he6GoxEdVs0Zp0JMgI-m_eEt2Fwvi55CtbSV86U2BJM2lecOgvaAb2Y',
-                        secretKey:
-                            'EFYEQd6AALi7DZUENJSVRoog3ZNrSpn0n3vyPQDRlE0TDJ3G1xReLSYAFtSZnr9_OqYOmk_A4ATEqSRL',
-                        returnURL: "https://samplesite.com/return",
-                        cancelURL: "https://samplesite.com/cancel",
-                        transactions: const [
-                          {
-                            "amount": {
-                              "total": '10.12',
-                              "currency": "USD",
-                              "details": {
-                                "subtotal": '10.12',
-                                "shipping": '0',
-                                "shipping_discount": 0
-                              }
-                            },
-                            "description":
-                                "The payment transaction description.",
-                            "item_list": {
-                              "items": [
-                                {
-                                  "name": "Reservation payment",
-                                  "quantity": 1,
-                                  "price": '10.12',
-                                  "currency": "USD"
-                                }
-                              ],
-                            }
-                          }
-                        ],
-                        note: "Contact us for any questions on your order.",
-                        onSuccess: (Map params) async {
-                          try {
-                            _userProvider.payMembership(
-                                int.parse(Autentification.tokenDecoded!['Id']));
-
-                            if (mounted) {
-                              setState(() {
-                                isPayed = true;
-                              });
-                            }
-                          } on Exception catch (e) {
-                            // TODO
-                          }
-                          Autentification.token = null;
-                          Autentification.tokenDecoded = null;
-                        },
-                        onError: (error) {},
-                        onCancel: (params) {
-                          alertBox(context, AppLocalizations.of(context).error,
-                              AppLocalizations.of(context).cancel_payment);
-                        }),
-                  ),
-                )
-              },
             ),
           ],
         ),
