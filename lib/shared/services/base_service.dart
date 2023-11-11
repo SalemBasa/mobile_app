@@ -69,6 +69,39 @@ abstract class BaseService<T> with ChangeNotifier {
     }
   }
 
+  Future quizSubmission(dynamic object) async {
+    var url = "$baseUrl$endpoint/QuizSubmission";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var jsonRequest = jsonEncode(object);
+
+    Response response = await post(uri, headers: headers, body: jsonRequest);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+      return data; 
+    } else {
+      throw Exception("Failed submit quiz");
+    }
+  }
+
+Future payWithBalanceAsync(dynamic object) async {
+    var url = "$baseUrl$endpoint/PayWithBalance";
+    var uri = Uri.parse(url);
+    var headers = createHeaders();
+
+    var jsonRequest = jsonEncode(object);
+
+    Response response = await post(uri, headers: headers, body: jsonRequest);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+      return data; 
+    } else {
+      throw Exception("Failed paying service");
+    } 
+  }
 
   Future<T> update(dynamic object) async {
     // [ ] znaci opcionalno

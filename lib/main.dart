@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:trash_track_mobile/features/garbage/screens/add-garbage.dart';
 import 'package:trash_track_mobile/features/garbage/services/garbages_service.dart';
+import 'package:trash_track_mobile/features/quiz/screens/quizzes_screen.dart';
+import 'package:trash_track_mobile/features/quiz/services/quiz_service.dart';
 import 'package:trash_track_mobile/features/report/screens/add_report.dart';
 import 'package:trash_track_mobile/features/report/screens/garbage_map.dart';
 import 'package:trash_track_mobile/features/report/services/reports_service.dart';
+import 'package:trash_track_mobile/features/reservation/screens/add-reservation.dart';
 import 'package:trash_track_mobile/features/reservation/services/reservation_service.dart';
+import 'package:trash_track_mobile/features/schedules/service/schedule_service.dart';
 import 'package:trash_track_mobile/features/services/services/services_service.dart';
 import 'package:trash_track_mobile/features/user/screens/login_screen.dart';
 import 'package:trash_track_mobile/features/user/screens/sign-up_screen.dart';
@@ -24,7 +28,8 @@ void main() {
         ChangeNotifierProvider(create: (context) => ReportService()),
         ChangeNotifierProvider(create: (context) => ServicesService()),
         ChangeNotifierProvider(create: (context) => ReservationService()),
-
+        ChangeNotifierProvider(create: (context) => QuizService()),
+        ChangeNotifierProvider(create: (context) => ScheduleService()),
       ],
       child: const MyApp()
     ),

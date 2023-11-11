@@ -36,13 +36,13 @@ Map<String, dynamic> _$ReportToJson(Report instance) => <String, dynamic>{
     };
 
 const _$ReportStateEnumMap = {
-  ReportState.waitingForReview: 'WaitingForReview',
-  ReportState.reviewed: 'Reviewed',
+  ReportState.waitingForReview: 'waitingForReview',
+  ReportState.reviewed: 'reviewed',
 };
 
 const _$ReportTypeEnumMap = {
-  ReportType.trashOverflow: 'TrashOverflow',
-  ReportType.littering: 'Littering',
-  ReportType.garbageBinDamage: 'GarbageBinDamage',
-  ReportType.graffitiVandalism: 'GraffitiVandalism',
+  ReportType.trashOverflow: 'trashOverflow',
+  ReportType.littering: 'littering',
+  ReportType.garbageBinDamage: 'garbageBinDamage',
+  ReportType.graffitiVandalism: 'graffitiVandalism',
 };

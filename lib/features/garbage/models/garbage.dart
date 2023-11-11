@@ -6,6 +6,7 @@ part 'garbage.g.dart';
 class Garbage {
   int? id;
   String? description;
+  String? address;
   GarbageType? garbageType; // Use the GarbageType enum here
   double? latitude; // Use double for latitude and longitude
   double? longitude;
@@ -13,6 +14,7 @@ class Garbage {
   Garbage({
     this.id,
     this.description,
+    this.address,
     this.garbageType,
     this.latitude,
     this.longitude,

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class AuthService extends ChangeNotifier {
   static String? _baseUrl;
@@ -55,66 +56,91 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> signUp(dynamic object) async {
+//   Future<dynamic> signUp(dynamic object) async {
+//     _endpoint = "api/Access/SignUp";
+//     var url = "$_baseUrl$_endpoint";
+
+//     var uri = Uri.parse(url);
+
+//     var jsonRequest = jsonEncode(object);
+
+//     Response response = await post(uri,
+//         headers: {
+//           'Content-Type': 'application/json; multipart/form-data; charset=UTF-8;',
+//         },
+//         body: jsonRequest);
+
+//     if (isValidResponse(response)) {
+//     } else {
+//       throw Exception("Unknown error");
+//     }
+//   }
+// }
+
+  Future<void> signUp(Map<String, dynamic> data) async {
     _endpoint = "api/Access/SignUp";
     var url = "$_baseUrl$_endpoint";
-
     var uri = Uri.parse(url);
+    final request = http.MultipartRequest('POST', uri)
+      ..headers['Content-Type'] = 'multipart/form-data';
 
-    var jsonRequest = jsonEncode(object);
+    // Add data fields to the request
+    data.forEach((key, value) {
+      request.fields[key] = value.toString();
+    });
 
-    Response response = await post(uri,
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonRequest);
+    // You can also add files to the request if needed
+    // request.files.add(await http.MultipartFile.fromPath('file', 'path/to/file'));
 
-    if (isValidResponse(response)) {
+    final response = await http.Response.fromStream(await request.send());
+
+    if (response.statusCode == 200) {
+      // Handle the response
     } else {
-      throw Exception("Unknown error");
+      // Handle the error
     }
   }
-}
 
-bool isValidResponse(Response response) {
-  if (response.statusCode < 299) {
-    return true;
-  } else if (response.statusCode == 401) {
-    throw Exception("Unauthorized");
-  } else {
-    throw Exception(
-        "Something bad happened please try again, Status code: ${response.statusCode}");
+  bool isValidResponse(Response response) {
+    if (response.statusCode < 299) {
+      return true;
+    } else if (response.statusCode == 401) {
+      throw Exception("Unauthorized");
+    } else {
+      throw Exception(
+          "Something bad happened please try again, Status code: ${response.statusCode}");
+    }
   }
-}
 
-String getQueryString(Map params,
-    {String prefix = '&', bool inRecursion = false}) {
-  String query = '';
-  params.forEach((key, value) {
-    if (inRecursion) {
-      if (key is int) {
-        key = '[$key]';
+  String getQueryString(Map params,
+      {String prefix = '&', bool inRecursion = false}) {
+    String query = '';
+    params.forEach((key, value) {
+      if (inRecursion) {
+        if (key is int) {
+          key = '[$key]';
+        } else if (value is List || value is Map) {
+          key = '.$key';
+        } else {
+          key = '.$key';
+        }
+      }
+      if (value is String || value is int || value is double || value is bool) {
+        var encoded = value;
+        if (value is String) {
+          encoded = Uri.encodeComponent(value);
+        }
+        query += '$prefix$key=$encoded';
+      } else if (value is DateTime) {
+        query += '$prefix$key=${(value as DateTime).toIso8601String()}';
       } else if (value is List || value is Map) {
-        key = '.$key';
-      } else {
-        key = '.$key';
+        if (value is List) value = value.asMap();
+        value.forEach((k, v) {
+          query +=
+              getQueryString({k: v}, prefix: '$prefix$key', inRecursion: true);
+        });
       }
-    }
-    if (value is String || value is int || value is double || value is bool) {
-      var encoded = value;
-      if (value is String) {
-        encoded = Uri.encodeComponent(value);
-      }
-      query += '$prefix$key=$encoded';
-    } else if (value is DateTime) {
-      query += '$prefix$key=${(value as DateTime).toIso8601String()}';
-    } else if (value is List || value is Map) {
-      if (value is List) value = value.asMap();
-      value.forEach((k, v) {
-        query +=
-            getQueryString({k: v}, prefix: '$prefix$key', inRecursion: true);
-      });
-    }
-  });
-  return query;
+    });
+    return query;
+  }
 }

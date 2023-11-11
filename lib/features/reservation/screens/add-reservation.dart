@@ -228,9 +228,9 @@ class _ReservationAddScreenState extends State<ReservationAddScreen> {
                       builder: (BuildContext context) => UsePaypal(
                           sandboxMode: true,
                           clientId:
-                              'AVFknc5oxUGa8x5r0iSzn0Ca3he6GoxEdVs0Zp0JMgI-m_eEt2Fwvi55CtbSV86U2BJM2lecOgvaAb2Y',
+                              'AZgXMnT0IYIilyF0A4tYews5fwMHNdXwyXjij8tn2KMxd3h33flvR9vOXEHtQwQyy8roESreLH9pKvjy',
                           secretKey:
-                              'EFYEQd6AALi7DZUENJSVRoog3ZNrSpn0n3vyPQDRlE0TDJ3G1xReLSYAFtSZnr9_OqYOmk_A4ATEqSRL',
+                              'EHiN3B3Zuy-vcM8ub36N64_FWVRLPyo4WRj0CNA9JaKnSenTWg8617fQWEaX4D1-9fXIO6MJQF8wFMcQ',
                           returnURL: "https://samplesite.com/return",
                           cancelURL: "https://samplesite.com/cancel",
                           transactions: [
@@ -270,8 +270,7 @@ class _ReservationAddScreenState extends State<ReservationAddScreen> {
                                   latitude: _selectedLocation!.latitude,
                                   longitude: _selectedLocation!.longitude,
                                   reservationStatus: _selectedReportState,
-                                  price: _selectedServicePrice
-                                  );
+                                  price: _selectedServicePrice);
 
                               await _reservationService.insert(newReservation);
                             } on Exception catch (error) {
@@ -280,7 +279,7 @@ class _ReservationAddScreenState extends State<ReservationAddScreen> {
                           },
                           onError: (error) {},
                           onCancel: (params) {
-                             print('cancelled: $params');
+                            print('cancelled: $params');
                           }),
                     ),
                   )
@@ -290,6 +289,43 @@ class _ReservationAddScreenState extends State<ReservationAddScreen> {
                   children: [
                     const SizedBox(width: 8),
                     const Text('Create Reservation'),
+                  ],
+                ),
+                style: ElevatedButton.styleFrom(
+                  primary: const Color(0xFF49464E),
+                  minimumSize: Size(400, 48),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 400,
+              child: ElevatedButton(
+                onPressed: () async {
+                  // Validate the "Note" field
+                  final _selectedReportState =
+                      ReservationStatus.values[_selectedReservationStatusIndex];
+
+                  final newReservation = Reservation(
+                      serviceId: _selectedServiceId,
+                      userId: userId,
+                      latitude: _selectedLocation!.latitude,
+                      longitude: _selectedLocation!.longitude,
+                      reservationStatus: _selectedReportState,
+                      price: _selectedServicePrice);
+
+                  try {
+                    await _reservationService.payWithBalanceAsync(newReservation);
+                    // Optionally, you can navigate to another screen or show a success message here.
+                  } catch (error) {
+                    print('Error paying reservation: $error');
+                    // Handle the error, e.g., show an error message.
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(width: 8),
+                    const Text('Pay With Balance'),
                   ],
                 ),
                 style: ElevatedButton.styleFrom(

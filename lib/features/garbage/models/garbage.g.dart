@@ -9,6 +9,7 @@ part of 'garbage.dart';
 Garbage _$GarbageFromJson(Map<String, dynamic> json) => Garbage(
       id: json['id'] as int?,
       description: json['description'] as String?,
+      address: json['address'] as String?,
       garbageType:
           $enumDecodeNullable(_$GarbageTypeEnumMap, json['garbageType']),
       latitude: (json['latitude'] as num?)?.toDouble(),
@@ -18,6 +19,7 @@ Garbage _$GarbageFromJson(Map<String, dynamic> json) => Garbage(
 Map<String, dynamic> _$GarbageToJson(Garbage instance) => <String, dynamic>{
       'id': instance.id,
       'description': instance.description,
+      'address': instance.address,
       'garbageType': _$GarbageTypeEnumMap[instance.garbageType],
       'latitude': instance.latitude,
       'longitude': instance.longitude,

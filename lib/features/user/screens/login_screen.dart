@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:trash_track_mobile/features/garbage/screens/add-garbage.dart';
-import 'package:trash_track_mobile/features/report/screens/add_report.dart';
-import 'package:trash_track_mobile/features/reservation/screens/add-reservation.dart';
+import 'package:jwt_decode/jwt_decode.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trash_track_mobile/features/user/services/auth_service.dart';
+import 'package:trash_track_mobile/shared/screens/main_page_driver.dart';
+import 'package:trash_track_mobile/shared/screens/main_page_user.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -22,40 +24,48 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleSignIn() async {
-  final email = _emailController.text;
-  final password = _passwordController.text;
+    final email = _emailController.text;
+    final password = _passwordController.text;
 
-  final token = await _authService.signIn(email, password);
+    final token = await _authService.signIn(email, password);
 
-  if (token != null) {
-    // Login successful, navigate to the AddReportScreen and pass the selectedGarbageId if needed.
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => AddReportScreen(), // Pass the selectedGarbageId here
-      ),
-    );
-  } else {
-    // Login failed, show an error message to the user.
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Login Failed'),
-          content: Text('Invalid email or password. Please try again.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
+    if (token != null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      Map<String, dynamic> decodedToken = Jwt.parseJwt(token!);
+      final role = decodedToken['Role'];
+
+      if (role == 'User') {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => MainScreenUser()),
         );
-      },
-    );
+      } else if (role == 'Driver') {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => MainScreenDriver()),
+        );
+      }
+    } else {
+      // Login failed, show an error message to the user.
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Login Failed'),
+            content: Text('Invalid email or password. Please try again.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -125,9 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Text(
                 'Forgot Password?',
                 style: TextStyle(
-                  color: Color(0xFF49464E), 
-                  fontWeight: FontWeight.bold
-                ),
+                    color: Color(0xFF49464E), fontWeight: FontWeight.bold),
               ),
             ),
             SizedBox(height: 20),
@@ -142,7 +150,8 @@ class _LoginScreenState extends State<LoginScreen> {
               style: ElevatedButton.styleFrom(
                 primary: Color(0xFF49464E), // Button color
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // Button border radius
+                  borderRadius:
+                      BorderRadius.circular(10), // Button border radius
                 ),
                 minimumSize: Size(400, 48), // Button size
               ),

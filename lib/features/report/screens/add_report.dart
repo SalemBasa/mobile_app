@@ -198,7 +198,6 @@ class _AddReportScreenState extends State<AddReportScreen> {
 
                   final newReport = Report(
                       note: newName,
-                      reportState: ReportState.waitingForReview,
                       reportType: _selectedReportType,
                       reporterUserId: userId,
                       garbageId: selectedGarbageId,

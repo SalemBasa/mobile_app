@@ -31,6 +31,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _fetchRoles();
   }
 
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _phoneNumberController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   Future<void> _fetchRoles() async {
     try {
       final typesData = await _enumsService.getRoles();
@@ -177,99 +187,95 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
             SizedBox(height: 10),
-            Container(
-              width: 400,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white,
-                border: Border.all(
-                  color: Color(0xFF49464E),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: DropdownButtonFormField<int>(
-                  value: _selectedRoleIndex,
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedRoleIndex = newValue ?? 0;
-                    });
-                  },
-                  items: _roles.entries.map((entry) {
-                    return DropdownMenuItem<int>(
-                      value: entry.key,
-                      child: Text(entry.value),
-                    );
-                  }).toList(),
-                  decoration: InputDecoration(
-                    labelText: 'Role',
-                    border: InputBorder.none,
+            _isLoading
+                ? CircularProgressIndicator()
+                : SizedBox(
+                    width: 400,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Container(
+                        width: 400,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          border: Border.all(
+                            color: const Color(0xFF49464E),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: DropdownButtonFormField<int>(
+                            value: _selectedRoleIndex,
+                            onChanged: (newValue) {
+                              setState(() {
+                                _selectedRoleIndex = newValue ?? 0;
+                              });
+                            },
+                            items: _roles.entries.map((entry) {
+                              return DropdownMenuItem<int>(
+                                value: entry.key,
+                                child: Text(entry.value),
+                              );
+                            }).toList(),
+                            decoration: InputDecoration(
+                              labelText: 'Roles',
+                              border: InputBorder.none,
+                            ),
+                            style: TextStyle(
+                              color: const Color(0xFF49464E),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  style: TextStyle(
-                    color: Color(0xFF49464E),
-                  ),
-                ),
-              ),
-            ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _isLoading
-                  ? null
-                  : () async {
-                      if (_isLoading) {
-                        return;
-                      }
+              onPressed: () async {
+                // final _selectedRole = Role.values[_selectedRoleIndex];
 
-                      final _selectedRole =
-                          Role.values[_selectedRoleIndex];
+                final userObject = {
+                  'firstName': _firstNameController.text,
+                  'lastName': _lastNameController.text,
+                  'phoneNumber': _phoneNumberController.text,
+                  'email': _emailController.text,
+                  'password': _passwordController.text,
+                  'role': _selectedRoleIndex
+                };
 
-                      final firstName = _firstNameController.text;
-                      final lastName = _lastNameController.text;
-                      final phoneNumber = _phoneNumberController.text;
-                      final email = _emailController.text;
-                      final password = _passwordController.text;
-                      final role = _selectedRole;
+                try {
+                  await _authService.signUp(userObject);
 
-                      final userObject = {
-                        'firstName': firstName,
-                        'lastName': lastName,
-                        'phoneNumber': phoneNumber,
-                        'email': email,
-                        'password': password,
-                        'role': role
-                      };
-
-                      try {
-                        await _authService.signUp(userObject);
-
-                        // Sign-up successful, navigate to a success screen or perform other actions.
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => AddPlaceScreen(),
+                  // Sign-up successful, navigate to a success screen or perform other actions.
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => AddPlaceScreen(),
+                    ),
+                  );
+                } catch (error) {
+                  // Sign-up failed, show an error message to the user.
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      print(error);
+                      return AlertDialog(
+                        title: Text('Sign Up Failed'),
+                        content: Text(
+                          'An error occurred during sign-up. Please try again. Error: $error',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('OK'),
                           ),
-                        );
-                      } catch (error) {
-                        // Sign-up failed, show an error message to the user.
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: Text('Sign Up Failed'),
-                              content: Text(
-                                  'An error occurred during sign-up. Please try again.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text('OK'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
+                        ],
+                      );
                     },
+                  );
+                }
+              },
               child: Text(
                 'Sign Up',
                 style: TextStyle(

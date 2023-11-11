@@ -24,10 +24,7 @@ UserEntity _$UserEntityFromJson(Map<String, dynamic> json) => UserEntity(
       countryId: json['countryId'] as int?,
       role: $enumDecodeNullable(_$RoleEnumMap, json['role']),
       roleId: json['roleId'] as int?,
-      profilePhoto: json['profilePhoto'] == null
-          ? null
-          : Photo.fromJson(json['profilePhoto'] as Map<String, dynamic>),
-      profilePhotoId: json['profilePhotoId'] as int?,
+      profilePhoto: json['profilePhoto'] as String?,
       isActive: json['isActive'] as bool?,
     );
 
@@ -46,18 +43,17 @@ Map<String, dynamic> _$UserEntityToJson(UserEntity instance) =>
       'country': instance.country,
       'roleId': instance.roleId,
       'role': _$RoleEnumMap[instance.role],
-      'profilePhotoId': instance.profilePhotoId,
       'profilePhoto': instance.profilePhoto,
       'isActive': instance.isActive,
     };
 
 const _$GenderEnumMap = {
-  Gender.male: 'male',
-  Gender.female: 'female',
+  Gender.male: 'Male',
+  Gender.female: 'Female',
 };
 
 const _$RoleEnumMap = {
-  Role.administrator: 'administrator',
-  Role.user: 'user',
-  Role.driver: 'driver',
+  Role.administrator: 'Administrator',
+  Role.user: 'User',
+  Role.driver: 'Driver',
 };
