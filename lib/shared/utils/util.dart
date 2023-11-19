@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 class Autentification {
   static String? token;
   static Map? tokenDecoded;
+
+  static void setToken(String? newToken) {
+    token = newToken;
+  }
 }
 
 dynamic DateEncode(dynamic item) {

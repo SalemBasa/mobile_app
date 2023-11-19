@@ -2,8 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:trash_track_mobile/features/cart/services/cart_service.dart';
 import 'package:trash_track_mobile/features/garbage/screens/add-garbage.dart';
 import 'package:trash_track_mobile/features/garbage/services/garbages_service.dart';
+import 'package:trash_track_mobile/features/notifications/services/notification_provider.dart';
+import 'package:trash_track_mobile/features/order/services/order_service.dart';
+import 'package:trash_track_mobile/features/products/screens/product_screen.dart';
+import 'package:trash_track_mobile/features/products/services/product_service.dart';
 import 'package:trash_track_mobile/features/quiz/screens/quizzes_screen.dart';
 import 'package:trash_track_mobile/features/quiz/services/quiz_service.dart';
 import 'package:trash_track_mobile/features/report/screens/add_report.dart';
@@ -30,6 +35,10 @@ void main() {
         ChangeNotifierProvider(create: (context) => ReservationService()),
         ChangeNotifierProvider(create: (context) => QuizService()),
         ChangeNotifierProvider(create: (context) => ScheduleService()),
+        ChangeNotifierProvider(create: (context) => ProductService()),
+        ChangeNotifierProvider(create: (context) => CartProvider()),
+        ChangeNotifierProvider(create: (context) => OrderService()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: const MyApp()
     ),

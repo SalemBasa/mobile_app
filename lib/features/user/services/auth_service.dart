@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:trash_track_mobile/shared/utils/util.dart';
 
 class AuthService extends ChangeNotifier {
   static String? _baseUrl;
@@ -11,7 +12,7 @@ class AuthService extends ChangeNotifier {
 
   AuthService() {
     _baseUrl = const String.fromEnvironment("baseUrl",
-        defaultValue: "http://10.0.2.2:5057/");
+        defaultValue: "http://10.0.2.2:7034/");
   }
 
   Future<void> signOut(BuildContext context) async {
@@ -45,6 +46,7 @@ class AuthService extends ChangeNotifier {
       String? token = result['token'];
 
       if (token != null) {
+        Autentification.setToken(token);
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('token', token);
         print('Token: $token');

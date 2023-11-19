@@ -1,57 +1,93 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:jwt_decode/jwt_decode.dart';
 import 'package:provider/provider.dart';
-import 'package:trash_track_mobile/features/quiz/models/quiz.dart';
-import 'package:trash_track_mobile/features/quiz/screens/quiz_details_screen.dart';
-import 'package:trash_track_mobile/features/quiz/services/quiz_service.dart';
+import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trash_track_mobile/features/order/models/order.dart';
+import 'package:trash_track_mobile/features/order/services/order_service.dart';
+import 'dart:convert';
+
+import 'package:trash_track_mobile/features/schedules/models/schedule.dart';
+import 'package:trash_track_mobile/features/schedules/screens/garbage_display_screen.dart';
+import 'package:trash_track_mobile/features/schedules/service/schedule_service.dart';
+import 'package:trash_track_mobile/features/user/services/users_service.dart';
 import 'package:trash_track_mobile/shared/widgets/paging_component.dart';
 import 'package:trash_track_mobile/shared/widgets/table_cell.dart';
 
-class QuizzesScreen extends StatefulWidget {
-  const QuizzesScreen({Key? key, this.quiz}) : super(key: key);
-  final Quiz? quiz;
+class OrdersScreen extends StatefulWidget {
+  const OrdersScreen({Key? key, this.order}) : super(key: key);
+
+  final Order? order;
 
   @override
-  _QuizzesScreenState createState() => _QuizzesScreenState();
+  _OrdersScreenState createState() => _OrdersScreenState();
 }
 
-class _QuizzesScreenState extends State<QuizzesScreen> {
-  late QuizService _quizService;
+class _OrdersScreenState extends State<OrdersScreen> {
+  late OrderService _orderService;
   Map<String, dynamic> _initialValue = {};
   bool _isLoading = true;
-  List<Quiz> _quizzes = [];
-
-  String _searchQuery = '';
+  List<Order> _orders = [];
+  int? userId;
 
   int _currentPage = 1;
-  int _itemsPerPage = 3;
+  int _itemsPerPage = 10;
   int _totalRecords = 0;
 
   @override
   void initState() {
     super.initState();
-    _quizService = context.read<QuizService>();
+    _orderService = context.read<OrderService>();
     _initialValue = {
-      'id': widget.quiz?.id.toString(),
-      'title': widget.quiz?.title,
-      'description': widget.quiz?.description,
+      'id': widget.order?.id.toString(),
+      'orderDate': widget.order?.orderDate,
+      'total': widget.order?.total,
+      'isCanceled': widget.order?.isCanceled,
+      'userId': widget.order?.userId,
+      'user': widget.order?.user,
+      'orderDetails': widget.order?.orderDetails,
     };
-
-    _loadPagedQuizzes();
+    _fetchUserIdAndLoadOrders();
   }
 
-  Future<void> _loadPagedQuizzes() async {
+  Future<void> _fetchUserIdAndLoadOrders() async {
+    await _fetchUserIdFromToken(); // Wait for userId to be fetched
+    _loadPagedSOrders(); // After userId is fetched, load schedules
+  }
+
+  Future<void> _fetchUserIdFromToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token != null) {
+      Map<String, dynamic> decodedToken = Jwt.parseJwt(token);
+      final userIdString = decodedToken['Id']; // Extract the ID as a string
+
+      if (userIdString != null) {
+        // Convert the string to an integer
+        setState(() {
+          userId = int.tryParse(
+              userIdString); // Use tryParse to handle invalid inputs
+        });
+      }
+    }
+  }
+
+  Future<void> _loadPagedSOrders() async {
     try {
-      final models = await _quizService.getPaged(
+      final models = await _orderService.getPaged(
         filter: {
-          'title': _searchQuery,
+          'userId': userId,
           'pageNumber': _currentPage,
           'pageSize': _itemsPerPage,
         },
       );
 
       setState(() {
-        _quizzes = models.items;
+        _orders = models.items;
         _totalRecords = models.totalCount;
         _isLoading = false;
       });
@@ -65,7 +101,7 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
       _currentPage = newPage;
     });
 
-    _loadPagedQuizzes();
+    _loadPagedSOrders();
   }
 
   @override
@@ -76,15 +112,15 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 50),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 50),
                     Text(
-                      'Quizzes',
+                      'Orders',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -92,7 +128,7 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
                       ),
                     ),
                     Text(
-                      'A summary of the Quizzes.',
+                      'A summary of the Order.',
                       style: TextStyle(
                         fontSize: 16,
                         color: Color(0xFF1D1C1E),
@@ -102,7 +138,7 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -116,30 +152,11 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
                         color: const Color(0xFF49464E),
                       ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: TextField(
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value;
-                          });
-                          _loadPagedQuizzes();
-                        },
-                        decoration: InputDecoration(
-                          labelText: 'Search',
-                          border: InputBorder.none,
-                        ),
-                        style: TextStyle(
-                          color: Color(0xFF49464E),
-                        ),
-                      ),
-                    ),
                   ),
                 ),
-                const SizedBox(width: 16),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -157,8 +174,10 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
                       color: Color(0xFFF7F1FB),
                     ),
                     children: [
-                      TableCellWidget(text: 'Title'),
-                      TableCellWidget(text: 'Description'),
+                      TableCellWidget(text: 'Order Number'),
+                      TableCellWidget(text: 'Order Date'),
+                      TableCellWidget(text: 'OrderDetails'),
+                      TableCellWidget(text: 'Total'),
                     ],
                   ),
                   if (_isLoading)
@@ -166,28 +185,28 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
                       children: [
                         TableCellWidget(text: 'Loading...'),
                         TableCellWidget(text: 'Loading...'),
+                        TableCellWidget(text: 'Loading...'),
+                        TableCellWidget(text: 'Loading...'),
                       ],
                     )
                   else
-                    ..._quizzes.asMap().entries.map((entry) {
+                    ..._orders.asMap().entries.map((entry) {
                       final index = entry.key;
-                      final quiz = entry.value;
+                      final order = entry.value;
                       return TableRow(
                         decoration: BoxDecoration(
                           color: Colors.transparent,
                         ),
                         children: [
+                          TableCellWidget(text: order.orderNumber!),
                           TableCellWidget(
-                            text: quiz.title ?? '',
-                            onTap: () {
-                              // Navigate to the QuizDetailsScreen when a quiz is tapped.
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) =>
-                                    QuizDetailsScreen(quiz: quiz),
-                              ));
-                            },
-                          ),
-                          TableCellWidget(text: quiz.description ?? '')
+                              text: DateFormat('dd/MM/yyyy')
+                                  .format(order.orderDate ?? DateTime.now())),
+                          TableCellWidget(
+                              text: order.orderDetails!
+                                  .map((e) => e.product?.name)
+                                  .join(', ')),
+                          TableCellWidget(text: order.total.toString() ?? ''),
                         ],
                       );
                     }),

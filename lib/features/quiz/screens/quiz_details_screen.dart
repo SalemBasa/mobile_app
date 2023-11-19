@@ -3,6 +3,7 @@ import 'package:jwt_decode/jwt_decode.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trash_track_mobile/features/quiz/models/quiz.dart';
+import 'package:trash_track_mobile/features/quiz/screens/quizzes_screen.dart';
 import 'package:trash_track_mobile/features/quiz/services/quiz_service.dart';
 
 class QuizDetailsScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class _QuizDetailsScreenState extends State<QuizDetailsScreen> {
   bool submitting = false;
 
   @override
-    void initState() {
+  void initState() {
     super.initState();
     _quizService = context.read<QuizService>();
     _fetchUserIdFromToken();
@@ -40,7 +41,6 @@ class _QuizDetailsScreenState extends State<QuizDetailsScreen> {
   Future<void> _fetchUserIdFromToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
-
 
     if (token != null) {
       Map<String, dynamic> decodedToken = Jwt.parseJwt(token);
@@ -66,13 +66,19 @@ class _QuizDetailsScreenState extends State<QuizDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Quiz Details'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            SizedBox(height: 50),
             Text(
               'Quiz Title: ${widget.quiz.title ?? ''}',
               style: TextStyle(
@@ -88,15 +94,7 @@ class _QuizDetailsScreenState extends State<QuizDetailsScreen> {
                 color: Color(0xFF1D1C1E),
               ),
             ),
-            SizedBox(height: 16),
-            Text(
-              'Questions:',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1D1C1E),
-              ),
-            ),
+            SizedBox(height: 36),
             if (widget.quiz.questions != null)
               for (var question in widget.quiz.questions!)
                 Column(
@@ -131,7 +129,7 @@ class _QuizDetailsScreenState extends State<QuizDetailsScreen> {
                     builder: (context) {
                       return AlertDialog(
                         title: Text('Error'),
-                        content: Text('You must select answer.'),
+                        content: Text('You must select an answer.'),
                         actions: [
                           TextButton(
                             onPressed: () {
@@ -143,24 +141,56 @@ class _QuizDetailsScreenState extends State<QuizDetailsScreen> {
                       );
                     },
                   );
-                  return; 
+                  return;
                 }
 
                 final finishedQuiz = {
-                  'userId' : userId,
-                  'quizId' : widget.quiz.id,
-                  'userAnswerIds' : selectedAnswerIds
+                  'userId': userId,
+                  'quizId': widget.quiz.id,
+                  'userAnswerIds': selectedAnswerIds
                 };
 
                 try {
-                  await _quizService.quizSubmission(finishedQuiz);
-                  // Optionally, you can navigate to another screen or show a success message here.
+                  final userScore =
+                      await _quizService.quizSubmission(finishedQuiz);
+
+                  // Show a dialog with the user's score
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('Quiz Completed'),
+                        content: Text('Your score: $userScore points'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 } catch (error) {
-                  print('Error submiting quiz: $error');
+                  print('Error submitting quiz: $error');
                   // Handle the error, e.g., show an error message.
                 }
               },
-              child: submitting ? CircularProgressIndicator() : Text('Finish'),
+              child: submitting
+                  ? CircularProgressIndicator()
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(width: 8),
+                        const Text('Finish'),
+                      ],
+                    ),
+              style: ElevatedButton.styleFrom(
+                primary: const Color(0xFF49464E),
+                minimumSize: Size(400, 48),
+              ),
             ),
           ],
         ),

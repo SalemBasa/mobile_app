@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trash_track_mobile/features/reservation/models/reservation.dart';
@@ -107,12 +108,12 @@ class _ReservationAddScreenState extends State<ReservationAddScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Align(
-        alignment: Alignment.topLeft,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 10),
+            const SizedBox(height: 50),
             Text(
               'Create Reservation',
               style: TextStyle(
@@ -218,7 +219,7 @@ class _ReservationAddScreenState extends State<ReservationAddScreen> {
                 _selectedLocation = location;
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 26),
             SizedBox(
               width: 400,
               child: ElevatedButton(
@@ -273,6 +274,22 @@ class _ReservationAddScreenState extends State<ReservationAddScreen> {
                                   price: _selectedServicePrice);
 
                               await _reservationService.insert(newReservation);
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text('Successfully created reservation!'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             } on Exception catch (error) {
                               print('Error adding reservation: $error');
                             }
@@ -297,6 +314,7 @@ class _ReservationAddScreenState extends State<ReservationAddScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
             SizedBox(
               width: 400,
               child: ElevatedButton(
@@ -314,7 +332,8 @@ class _ReservationAddScreenState extends State<ReservationAddScreen> {
                       price: _selectedServicePrice);
 
                   try {
-                    await _reservationService.payWithBalanceAsync(newReservation);
+                    await _reservationService
+                        .payWithBalanceAsync(newReservation);
                     // Optionally, you can navigate to another screen or show a success message here.
                   } catch (error) {
                     print('Error paying reservation: $error');

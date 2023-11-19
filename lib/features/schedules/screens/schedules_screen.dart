@@ -54,9 +54,9 @@ class _SchedulesScreenState extends State<SchedulesScreen> {
   }
 
   Future<void> _fetchUserIdAndLoadSchedules() async {
-  await _fetchUserIdFromToken(); // Wait for userId to be fetched
-  _loadPagedSchedules(); // After userId is fetched, load schedules
-}
+    await _fetchUserIdFromToken(); // Wait for userId to be fetched
+    _loadPagedSchedules(); // After userId is fetched, load schedules
+  }
 
   Future<void> _fetchUserIdFromToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -159,6 +159,7 @@ class _SchedulesScreenState extends State<SchedulesScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 50),
                     Text(
                       'Schedule',
                       style: TextStyle(
@@ -256,7 +257,7 @@ class _SchedulesScreenState extends State<SchedulesScreen> {
                       TableCellWidget(text: 'Pickup status'),
                       TableCellWidget(text: 'Drivers'),
                       TableCellWidget(text: 'Vehicle'),
-                      TableCellWidget(text: 'Garbages'),
+                      TableCellWidget(text: 'Locations'),
                     ],
                   ),
                   if (_isLoading)
@@ -290,17 +291,21 @@ class _SchedulesScreenState extends State<SchedulesScreen> {
                           TableCellWidget(
                               text: schedule.vehicle?.licensePlateNumber ?? ''),
                           TableCell(
-                              child: ElevatedButton(
-                                  onPressed: () {
-                                    final garbageIds = schedule
-                                        .scheduleGarbages!
-                                        .map((e) => e.garbageId)
-                                        .where((id) => id != null)
-                                        .map((id) => id!)
-                                        .toList();
-                                    _onDisplayGarbages(garbageIds);
-                                  },
-                                  child: Text('Show Garbages'))),
+                            child: IconButton(
+                              onPressed: () {
+                                final garbageIds = schedule.scheduleGarbages!
+                                    .map((e) => e.garbageId)
+                                    .where((id) => id != null)
+                                    .map((id) => id!)
+                                    .toList();
+                                _onDisplayGarbages(garbageIds);
+                              },
+                              icon: Icon(
+                                Icons.location_on,
+                                color: Color(0xFF49464E),
+                              ),
+                            ),
+                          ),
                         ],
                       );
                     }),

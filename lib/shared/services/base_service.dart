@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:trash_track_mobile/features/products/models/product.dart';
+
 import '../models/search_result.dart';
 import '../utils/util.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +15,7 @@ abstract class BaseService<T> with ChangeNotifier {
   BaseService(String point) {
     endpoint += point;
     baseUrl = const String.fromEnvironment("baseUrl",
-        defaultValue: "http://10.0.2.2:5057/");
+        defaultValue: "http://10.0.2.2:7034/");
   }
 
   Future<SearchResult<T>> getPaged({dynamic filter}) async {
@@ -80,13 +82,31 @@ abstract class BaseService<T> with ChangeNotifier {
 
     if (isValidResponse(response)) {
       var data = jsonDecode(response.body);
-      return data; 
+      return data;
     } else {
       throw Exception("Failed submit quiz");
     }
   }
 
-Future payWithBalanceAsync(dynamic object) async {
+  Future<List<Product>> Recommend(int userId) async {
+    var uri =
+        Uri.parse("$baseUrl$endpoint/Recommended/$userId");
+
+    Map<String, String> headers = createHeaders();
+
+    var response = await get(uri, headers: headers);
+
+    if (isValidResponse(response)) {
+      var data = jsonDecode(response.body);
+      List<Product> list =
+          data.map((x) => fromJson(x)).cast<Product>().toList();
+      return list;
+    } else {
+      throw Exception("Error");
+    }
+  }
+
+  Future payWithBalanceAsync(dynamic object) async {
     var url = "$baseUrl$endpoint/PayWithBalance";
     var uri = Uri.parse(url);
     var headers = createHeaders();
@@ -97,11 +117,28 @@ Future payWithBalanceAsync(dynamic object) async {
 
     if (isValidResponse(response)) {
       var data = jsonDecode(response.body);
-      return data; 
+      return data;
     } else {
       throw Exception("Failed paying service");
-    } 
+    }
   }
+
+  // Future<List<Product>> Recommend(int userId) async {
+  //   var uri = Uri.parse("$baseUrl/$userId/recommended");
+
+  //   Map<String, String> headers = createHeaders();
+
+  //   var response = await get(uri, headers: headers);
+
+  //   if (isValidResponse(response)) {
+  //     var data = jsonDecode(response.body);
+  //     List<Product> list =
+  //         data.map((x) => fromJson(x)).cast<Product>().toList();
+  //     return list;
+  //   } else {
+  //     throw Exception("Error");
+  //   }
+  // }
 
   Future<T> update(dynamic object) async {
     // [ ] znaci opcionalno

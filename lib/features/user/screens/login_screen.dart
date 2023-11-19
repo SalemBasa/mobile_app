@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trash_track_mobile/features/user/screens/sign-up_screen.dart';
 import 'package:trash_track_mobile/features/user/services/auth_service.dart';
 import 'package:trash_track_mobile/shared/screens/main_page_driver.dart';
 import 'package:trash_track_mobile/shared/screens/main_page_user.dart';
@@ -130,12 +131,27 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             SizedBox(height: 10),
-            Align(
-              alignment: Alignment.center,
-              child: Text(
-                'Forgot Password?',
-                style: TextStyle(
-                    color: Color(0xFF49464E), fontWeight: FontWeight.bold),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => SignUpScreen(),
+                  ),
+                );
+              },
+              child: TextButton(
+                onPressed:
+                    null, // Set to null to make it disabled initially, as GestureDetector handles the tap
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Create Account',
+                    style: TextStyle(
+                      color: Color(0xFF49464E),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
             ),
             SizedBox(height: 20),

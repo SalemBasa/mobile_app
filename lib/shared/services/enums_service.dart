@@ -6,7 +6,7 @@ class EnumsService {
 
   Future<Map<int, String>> getVehicleTypes() async {
     final response = await http
-        .get(Uri.parse('http://10.0.2.2/5057/api/Enums/vehicle-types'));
+        .get(Uri.parse('http://10.0.2.2/7034/api/Enums/vehicle-types'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -33,7 +33,7 @@ class EnumsService {
 
   Future<Map<int, String>> getGarbageTypes() async {
     final response = await http
-        .get(Uri.parse('http://10.0.2.2:5057/api/Enums/garbage-types'));
+        .get(Uri.parse('http://10.0.2.2:7034/api/Enums/garbage-types'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -60,7 +60,7 @@ class EnumsService {
 
   Future<Map<int, String>> getRoles() async {
     final response =
-        await http.get(Uri.parse('http://10.0.2.2:5057/api/Enums/roles'));
+        await http.get(Uri.parse('http://10.0.2.2:7034/api/Enums/roles'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -87,7 +87,7 @@ class EnumsService {
 
   Future<Map<int, String>> getReportTypes() async {
     final response = await http
-        .get(Uri.parse('http://10.0.2.2:5057/api/Enums/report-types'));
+        .get(Uri.parse('http://10.0.2.2:7034/api/Enums/report-types'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -114,7 +114,7 @@ class EnumsService {
 
   Future<Map<int, String>> getReportStates() async {
     final response = await http
-        .get(Uri.parse('http://10.0.2.2:5057/api/Enums/report-states'));
+        .get(Uri.parse('http://10.0.2.2:7034/api/Enums/report-states'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -141,7 +141,7 @@ class EnumsService {
 
     Future<Map<int, String>> getReservationStatus() async {
     final response = await http
-        .get(Uri.parse('http://10.0.2.2:5057/api/Enums/reservation-status'));
+        .get(Uri.parse('http://10.0.2.2:7034/api/Enums/reservation-status'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);

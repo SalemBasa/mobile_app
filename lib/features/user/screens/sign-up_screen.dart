@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:trash_track_mobile/features/garbage/screens/add-garbage.dart';
-import 'package:trash_track_mobile/features/user/models/user.dart';
 import 'package:trash_track_mobile/features/user/services/auth_service.dart';
 import 'package:trash_track_mobile/shared/services/enums_service.dart';
+import 'package:trash_track_mobile/features/user/screens/login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -229,6 +228,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                   ),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => LoginScreen(),
+                  ),
+                );
+              },
+              child: TextButton(
+                onPressed:
+                    null, // Set to null to make it disabled initially, as GestureDetector handles the tap
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Already have an account?',
+                    style: TextStyle(
+                      color: Color(0xFF49464E),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
@@ -249,7 +271,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   // Sign-up successful, navigate to a success screen or perform other actions.
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (context) => AddPlaceScreen(),
+                      builder: (context) => LoginScreen(),
                     ),
                   );
                 } catch (error) {

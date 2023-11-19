@@ -49,7 +49,7 @@ class _ImageInputState extends State<ImageInput> {
           decoration: BoxDecoration(
             border: Border.all(
               width: 1,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+              color: const Color(0xFF49464E),
             ),
           ),
           child: _selectedImage == null
@@ -66,6 +66,10 @@ class _ImageInputState extends State<ImageInput> {
           icon: Icon(Icons.camera),
           label: Text('Take Picture'),
           onPressed: _pickImage,
+          style: ButtonStyle(
+            backgroundColor:
+                MaterialStateProperty.all<Color>(const Color(0xFF49464E)),
+          ),
         ),
       ],
     );

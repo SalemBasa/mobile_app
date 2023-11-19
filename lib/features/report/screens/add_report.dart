@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trash_track_mobile/features/notifications/services/notification_provider.dart';
 import 'package:trash_track_mobile/features/photo/models/photo.dart';
 import 'package:trash_track_mobile/features/report/models/report.dart';
 import 'package:trash_track_mobile/features/report/screens/garbage_map.dart';
@@ -23,6 +24,7 @@ class _AddReportScreenState extends State<AddReportScreen> {
   late TextEditingController _noteController;
   File? _selectedImage;
   late EnumsService _enumsService;
+  late NotificationProvider notificationProvider;
   late int _selectedReportTypeIndex;
   late Map<int, String> _reportTypes;
   bool _isLoading = true;
@@ -35,6 +37,7 @@ class _AddReportScreenState extends State<AddReportScreen> {
   void initState() {
     super.initState();
     _enumsService = EnumsService();
+    notificationProvider = NotificationProvider();
     _noteController = TextEditingController();
     _selectedReportTypeIndex = 0;
     _fetchReportTypes();
@@ -53,13 +56,11 @@ class _AddReportScreenState extends State<AddReportScreen> {
 
     if (token != null) {
       Map<String, dynamic> decodedToken = Jwt.parseJwt(token);
-      final userIdString = decodedToken['Id']; // Extract the ID as a string
+      final userIdString = decodedToken['Id'];
 
       if (userIdString != null) {
-        // Convert the string to an integer
         setState(() {
-          userId = int.tryParse(
-              userIdString); // Use tryParse to handle invalid inputs
+          userId = int.tryParse(userIdString);
         });
       }
     }
@@ -85,18 +86,39 @@ class _AddReportScreenState extends State<AddReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add new Report'),
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
+            const SizedBox(height: 50),
+            Text(
+              'Create Report',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
             TextField(
-              decoration: const InputDecoration(labelText: 'Note'),
+              decoration: InputDecoration(
+                labelText: 'Note',
+                labelStyle: TextStyle(
+                  color: const Color(0xFF49464E),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: const Color(0xFF49464E),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: const Color(0xFF49464E),
+                  ),
+                ),
+              ),
               controller: _noteController,
               style: TextStyle(
-                color: Colors.black,
+                color: const Color(0xFF49464E),
               ),
             ),
             const SizedBox(height: 16),
@@ -157,20 +179,34 @@ class _AddReportScreenState extends State<AddReportScreen> {
                   selectedGarbageId = _selectedGarbageId;
                 });
               },
-              child: Text('Select Garbage'),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.location_on, // Add the location icon
+                    color: Colors.white, // Set the icon color
+                  ),
+                  SizedBox(width: 8), // Add some space between icon and text
+                  Text('Select Garbage'),
+                ],
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: const Color(0xFF49464E),
+                minimumSize: Size(400, 48),
+              ),
             ),
+            const SizedBox(height: 16),
             ImageInput(
               onPickImage: (image, base64Image) {
                 _selectedImage = image;
-                _selectedImageBase64 = base64Image; // Store the base64 string
+                _selectedImageBase64 = base64Image;
               },
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 26),
             SizedBox(
               width: 400,
               child: ElevatedButton(
                 onPressed: () async {
-                  // Validate the "Note" field
                   final newName = _noteController.text;
                   if (newName.isEmpty) {
                     showDialog(
@@ -190,7 +226,7 @@ class _AddReportScreenState extends State<AddReportScreen> {
                         );
                       },
                     );
-                    return; // Exit the function if "Note" is empty
+                    return;
                   }
 
                   final _selectedReportType =
@@ -205,10 +241,34 @@ class _AddReportScreenState extends State<AddReportScreen> {
 
                   try {
                     await reportService.insert(newReport);
-                    // Optionally, you can navigate to another screen or show a success message here.
+                    
+                    await notificationProvider.sendRabbitNotification({
+                      "title": "Created new report",
+                      "content":
+                          "Successfully submited new report, type : ${newReport.reportType}",
+                      "isRead": false,
+                      "userId": 1
+                    });
+
+                    showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('Successfully created report!'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
                   } catch (error) {
                     print('Error adding report: $error');
-                    // Handle the error, e.g., show an error message.
                   }
                 },
                 child: Row(
